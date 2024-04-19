@@ -1,35 +1,64 @@
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.*;
+import org.junit.Test;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Map;
+import java.util.ArrayList;
 
 public class PrizeDistributorTest {
 
     @Test
-    void testPrizeDistribution() {
-        // Prepare input
-        String input = "100\n200\n300\nnext\nsteve\njoshua\nevans\nexit\n";
-        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        System.setIn(inputStream);
+    public void testNumberOfWinners() {
+        // Set up your input data
+        String input = "200,300,500,1000,600\nSteve,John,Joshua,Evans,Ernest\nexit\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
 
-        // Redirect output
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        // Call the main method
+        PrizeDistributor.main(new String[0]);
 
-        // Run the main method of the PrizeDistributor class
-        PrizeDistributor.main(null);
+        // Verify that the correct number of winners are selected
+        Map<String, ArrayList<Integer>> winnerPrizes = PrizeDistributor.getWinnerPrizes();
+        assertEquals(5, winnerPrizes.size());
+    }
 
-        // Expected output
-        String expectedOutput = "Enter integers (enter a non-integer value to stop):\n" +
-                "Enter names (enter 'exit' to stop):\n" +
-                "More names than numbers, removed the last name.\n" +
-                "evans: 100, 200 = 300\n" +
-                "joshua: 300 = 300\n" +
-                "steve: 200 = 200\n";
+    @Test
+    public void testEachWinnerReceivesPrize() {
+        // Set up your input data
+        String input = "200,300,500,1000,600\nSteve,John,Joshua,Evans,Ernest\nexit\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
 
-        // Compare actual output with expected output
-        assertEquals(expectedOutput, outputStream.toString());
+        // Call the main method
+        PrizeDistributor.main(new String[0]);
+
+        // Verify that each winner receives at least one prize
+        Map<String, ArrayList<Integer>> winnerPrizes = PrizeDistributor.getWinnerPrizes();
+        for (ArrayList<Integer> prizes : winnerPrizes.values()) {
+            assertFalse(prizes.isEmpty());
+        }
+    }
+
+    @Test
+    public void testTotalSumOfPrizes() {
+        // Set up your input data
+        String input = "200,300,500,1000,600\nSteve,John,Joshua,Evans,Ernest\nexit\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
+
+        // Call the main method
+        PrizeDistributor.main(new String[0]);
+
+        // Verify that the total sum of prizes distributed is equal
+        // to the total sum of prize amounts inputted
+        Map<String, ArrayList<Integer>> winnerPrizes = PrizeDistributor.getWinnerPrizes();
+        int totalSum = 0;
+        for (ArrayList<Integer> prizes : winnerPrizes.values()) {
+            for (int prize : prizes) {
+                totalSum += prize;
+            }
+        }
+
+        assertEquals(2600, totalSum);
     }
 }
